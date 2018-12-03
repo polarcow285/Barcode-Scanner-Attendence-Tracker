@@ -40,6 +40,7 @@ function inputFunction(){
   nameSearch()
   classListing()
   intro()
+  classChecker()
 }
 
 function currentDate(){
@@ -59,6 +60,7 @@ function resetFunction(){
 
 
 function nameSearch(){
+  //finds row of name on roster
   ss.setActiveSheet(ss.getSheetByName("Roster"));
   row = 1
   do{
@@ -73,9 +75,11 @@ function intro(){
  //firstName = SpreadsheetApp.getActiveSheet().getRange('A'+ row).getValue();
  firstName = ss.getRange('A'+ row).getValue();
  lastName = ss.getRange('B'+ row).getValue();
- if (Browser.msgBox("Hello "+ firstName +" "+ lastName + "! Please confirm that you are taking these class(es): "+ classStr, Browser.Buttons.YES_NO) == "no"){
-   Browser.msgBox("Please speak to your instructor to update your records.");
- }
+  
+ Browser.msgBox("Hello " + firstName +  " " + lastName) 
+ //if (Browser.msgBox("Hello "+ firstName +" "+ lastName + "! Please confirm that you are taking these class(es): "+ classStr, Browser.Buttons.YES_NO) == "no"){
+   //Browser.msgBox("Please speak to your instructor to update your records.");
+// }
 }
 
 function classListing(){
@@ -93,16 +97,29 @@ function classListing(){
     classStr = classStr + " Open"
   }
 }
-
-function classChecker(){
- //check if the person is signed up for beginner class on roster
+function classCheckerHelper(classType){
   var column
   var timeRow
-  nameSearch();
-  if (ss.getRange('C' + row).getValue() == 1){
+  ss.setActiveSheet(ss.getSheetByName("Roster"));
+  var classLetter 
+  if (classType == "Beginner" ){
+    classLetter = "C"
+  }
+  if (classType =="Intermediate" ){
+    classLetter = "D"
+  }
+  if (classType == "Advanced" ){
+    classLetter = "E"
+  }
+  if (classType == "Open" ){
+    classLetter = "F"
+  }
+  if (ss.getRange(classLetter + row).getValue() == 1){
     //check if there is a beginner class today
     ss.setActiveSheet(ss.getSheetByName("Schedule(Pasadena)"));
+    //gets current day
     var day = d.getDay()
+    //finds right column to search
     if (day == 1){
       column = 'B'
     }
@@ -121,16 +138,35 @@ function classChecker(){
     if (day == 6){
       column = 'G'
     }
-    if (day == 7){
+    if (day == 0){
       column = 'H'
     }
+    //checks if there is a beginner class on that day
     timeRow = 1
+
     do{
       var class = ss.getRange(column + timeRow).getValue();
       timeRow = timeRow+1
-    } while(name != "Beginner" || timeRow == 27)
-      //search all the way until D27
+    } while((timeRow < 27) && (class != classType))
+
+    //search all the way until 27
+    timeRow = timeRow - 1
+    if (timeRow >= 26){
+     Browser.msgBox("Sorry! No "+ classType + " class today!") 
+    }
+    else {
+     Browser.msgBox("You are in the " + classType + " Class today at " + ss.getRange( 'A' + timeRow).getValue())
+    } 
   }
-  
+   
+}
+
+function classChecker(){
+ //check if the person is signed up for beginner class on roster  
+  nameSearch();
+  classCheckerHelper("Beginner");
+  classCheckerHelper("Intermediate");
+  classCheckerHelper("Advanced");
+  classCheckerHelper("Open");
  
 }

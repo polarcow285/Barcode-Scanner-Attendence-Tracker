@@ -9,38 +9,55 @@ var ss = SpreadsheetApp.getActiveSpreadsheet();
 var row
 var classStr
 
-function myFunction() {
-  Browser.msgBox("Hello World! Welcome to my wonderful Barcode Program!");
+function getName() {
+ ss.setActiveSheet(ss.getSheetByName("Roster")); 
+ firstName = ss.getRange('B'+ row).getValue();
+ lastName = ss.getRange('C'+ row).getValue();
 }
 
 function inputFunction(){
+  
   input = Browser.inputBox("Scan Now");
   
+  ss.setActiveSheet(ss.getSheetByName("Barcode Data"));
   //find out where to start storing data
-  rowCounter = ss.getRange('D1').getValue();
+  rowCounter = ss.getRange('F1').getValue();
   
-  //Which cell the name is stored, and stores name
+  //Which cell the serial number is stored, and stores serial number
   cell = 'A' + rowCounter  
   ss.getRange(cell).setValue(input);
+  
+  serialNumberSearch()
+  getName()
+  
+  ss.setActiveSheet(ss.getSheetByName("Barcode Data"));
+  
+  //firstname
+  cell = 'B' + rowCounter
+  ss.getRange(cell).setValue(firstName);
+  
+  //lastname
+  cell = 'C' + rowCounter
+  ss.getRange(cell).setValue(lastName);
   
   //find out the current time
   var currentTime = d.toLocaleTimeString(); // "12:35 PM", for instance
   
   //which cell the time is stored, and stores time
-  cell = 'B' + rowCounter
+  cell = 'D' + rowCounter
   ss.getRange(cell).setValue(currentTime);
   
   //which cell the date is stored, and stores date
-  cell = 'C' + rowCounter
+  cell = 'E' + rowCounter
   ss.getRange(cell).setValue(currentDate());
   
   rowCounter = rowCounter + 1 
-  // increase counter by 1 and store it back into D1
-  ss.getRange('D1').setValue(rowCounter);
-  nameSearch()
+  // increase counter by 1 and store it back into F1
+  ss.getRange('F1').setValue(rowCounter);
   classListing()
   intro()
   classChecker()
+  ss.setActiveSheet(ss.getSheetByName("Welcome Screen"));
 }
 
 function currentDate(){
@@ -52,31 +69,35 @@ function currentDate(){
 
 
 function resetFunction(){
-  ss.getRange('D1').setValue(2);
-  ss.getRange('A2:A1000').clearContent();
-  ss.getRange('B2:B1000').clearContent();
-  ss.getRange('C2:C1000').clearContent();
+  if (Browser.msgBox("Are you sure you want to clear data?", Browser.Buttons.YES_NO) == "yes"){
+   ss.getRange('F1').setValue(2);
+   ss.getRange('A2:A1000').clearContent();
+   ss.getRange('B2:B1000').clearContent();
+   ss.getRange('C2:C1000').clearContent();
+   ss.getRange('D2:C1000').clearContent();
+   ss.getRange('E2:C1000').clearContent();
+  }
 }
 
 
-function nameSearch(){
-  //finds row of name on roster
+function serialNumberSearch(){
+  //finds row of serial number on roster
   ss.setActiveSheet(ss.getSheetByName("Roster"));
   row = 1
   do{
-    var name = ss.getRange('A'+ row).getValue();
+    var serialNumber = ss.getRange('A'+ row).getValue();
     row = row+1
-  } while(name != input)
+  } while(serialNumber != input)
   row = row-1
   
 }
 
 function intro(){
  //firstName = SpreadsheetApp.getActiveSheet().getRange('A'+ row).getValue();
- firstName = ss.getRange('A'+ row).getValue();
- lastName = ss.getRange('B'+ row).getValue();
+ firstName = ss.getRange('B'+ row).getValue();
+ lastName = ss.getRange('C'+ row).getValue();
   
- Browser.msgBox("Hello " + firstName +  " " + lastName) 
+ //Browser.msgBox("Hello " + firstName +  " " + lastName) 
  //if (Browser.msgBox("Hello "+ firstName +" "+ lastName + "! Please confirm that you are taking these class(es): "+ classStr, Browser.Buttons.YES_NO) == "no"){
    //Browser.msgBox("Please speak to your instructor to update your records.");
 // }
@@ -84,16 +105,16 @@ function intro(){
 
 function classListing(){
   classStr = ""
-  if (ss.getRange('C'+ row).getValue() == 1){
+  if (ss.getRange('D'+ row).getValue() == 1){
    classStr = classStr + "Beginner Class"
   }
-  if (ss.getRange('D'+ row).getValue() ==1){
+  if (ss.getRange('E'+ row).getValue() ==1){
     classStr = classStr + " Intermediate Class"
   }
-  if (ss.getRange('E'+ row).getValue() ==1){
+  if (ss.getRange('F'+ row).getValue() ==1){
     classStr = classStr + " Advanced Class"
   }
-  if (ss.getRange('F'+ row).getValue() ==1){
+  if (ss.getRange('G'+ row).getValue() ==1){
     classStr = classStr + " Open"
   }
 }
@@ -103,16 +124,16 @@ function classCheckerHelper(classType){
   ss.setActiveSheet(ss.getSheetByName("Roster"));
   var classLetter 
   if (classType == "Beginner" ){
-    classLetter = "C"
-  }
-  if (classType =="Intermediate" ){
     classLetter = "D"
   }
-  if (classType == "Advanced" ){
+  if (classType =="Intermediate" ){
     classLetter = "E"
   }
-  if (classType == "Open" ){
+  if (classType == "Advanced" ){
     classLetter = "F"
+  }
+  if (classType == "Open" ){
+    classLetter = "G"
   }
   if (ss.getRange(classLetter + row).getValue() == 1){
     //check if there is a beginner class today
@@ -152,10 +173,12 @@ function classCheckerHelper(classType){
     //search all the way until 27
     timeRow = timeRow - 1
     if (timeRow >= 26){
-     Browser.msgBox("Sorry! No "+ classType + " class today!") 
+     //Browser.msgBox("Sorry! No "+ classType + " class today!") 
     }
     else {
-     Browser.msgBox("You are in the " + classType + " Class today at " + ss.getRange( 'A' + timeRow).getValue())
+     getName()
+     ss.setActiveSheet(ss.getSheetByName("Schedule(Pasadena)"));
+     Browser.msgBox("Hello " + firstName + " " + lastName + " You are in the " + classType + " Class today at " + ss.getRange( 'A' + timeRow).getValue())
     } 
   }
    
@@ -163,10 +186,18 @@ function classCheckerHelper(classType){
 
 function classChecker(){
  //check if the person is signed up for beginner class on roster  
-  nameSearch();
+  serialNumberSearch();
   classCheckerHelper("Beginner");
   classCheckerHelper("Intermediate");
   classCheckerHelper("Advanced");
   classCheckerHelper("Open");
  
+}
+
+function showAttendanceData(){
+  ss.setActiveSheet(ss.getSheetByName("Barcode Data"));
+}
+
+function backToWelcomeScreen(){
+  ss.setActiveSheet(ss.getSheetByName("Welcome Screen"));
 }

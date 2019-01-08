@@ -8,6 +8,9 @@ var class
 var ss = SpreadsheetApp.getActiveSpreadsheet();
 var row
 var classStr
+var app = UiApp.createApplication().setHeight('100').setWidth('300');
+//var theCurrentTime
+var sheet = SpreadsheetApp.getActiveSpreadsheet();
 
 function getName() {
  ss.setActiveSheet(ss.getSheetByName("Roster")); 
@@ -19,7 +22,9 @@ function inputFunction(){
   
   input = Browser.inputBox("Scan Now");
   
-  ss.setActiveSheet(ss.getSheetByName("Barcode Data"));
+  ss.setActiveSheet(ss.getSheetByName("Attendance Data"));
+  //ss.hideSheet();
+  
   //find out where to start storing data
   rowCounter = ss.getRange('F1').getValue();
   
@@ -30,8 +35,8 @@ function inputFunction(){
   serialNumberSearch()
   getName()
   
-  ss.setActiveSheet(ss.getSheetByName("Barcode Data"));
-  
+  ss.setActiveSheet(ss.getSheetByName("Attendance Data"));
+  //ss.hideSheet();
   //firstname
   cell = 'B' + rowCounter
   ss.getRange(cell).setValue(firstName);
@@ -173,12 +178,12 @@ function classCheckerHelper(classType){
     //search all the way until 27
     timeRow = timeRow - 1
     if (timeRow >= 26){
-     //Browser.msgBox("Sorry! No "+ classType + " class today!") 
+     Browser.msgBox("Sorry " + firstName + " " + lastName + "! No "+ classType + " class today!") 
     }
     else {
      getName()
      ss.setActiveSheet(ss.getSheetByName("Schedule(Pasadena)"));
-     Browser.msgBox("Hello " + firstName + " " + lastName + " You are in the " + classType + " Class today at " + ss.getRange( 'A' + timeRow).getValue())
+     Browser.msgBox("Hello " + firstName + " " + lastName + "!" + " You are in the " + classType + " Class today at " + ss.getRange( 'A' + timeRow).getValue() + ".")
     } 
   }
    
@@ -195,9 +200,145 @@ function classChecker(){
 }
 
 function showAttendanceData(){
-  ss.setActiveSheet(ss.getSheetByName("Barcode Data"));
+  ss.setActiveSheet(ss.getSheetByName("Attendance Data"));
 }
 
 function backToWelcomeScreen(){
   ss.setActiveSheet(ss.getSheetByName("Welcome Screen"));
 }
+
+function newStudentEnrollmentButton(){
+  if (Browser.msgBox("Are you a new student in Swords Fencing Studio?", Browser.Buttons.YES_NO) == "yes"){
+  showurl();
+  //newStudentRowCounter();
+  //theCurrentTime = d.toLocaleTimeString();
+  //ss.setActiveSheet(ss.getSheetByName("New Student Enrollment Responses"));
+  //everytime a new response comes in, add one to the counter to tell where to start saving data
+  //save firstname and lastname and classes in variables
+  //go to roster sheet
+  //iterate through rows until reaching empty rows / if there is an easier way to find the first empty row
+  //add firstname, lastname, class
+  
+}
+}
+  
+function showurl() {
+  var app = UiApp.createApplication().setHeight('100').setWidth('300');
+  app.setTitle("New Student Enrollment");
+  var panel = app.createPopupPanel()
+  var link = app.createAnchor('Please fill out this form:', 'https://goo.gl/forms/eptCaaoT4vrhI2rG3');
+  panel.add(link);
+  app.add(panel);
+  var doc = SpreadsheetApp.getActive();
+  doc.show(app);    
+}
+  
+/*function onFormSubmit(){
+  //compare current time with form button submit
+  //get value of form button submit
+  var responseRow = 2
+  do {
+   ss.setActiveSheet(ss.getSheetByName("New Student Enrollment Responses"));
+   var responseTime = ss.getRange('A'+ row).getValue()
+   responseRow = responseRow + 1
+    } while responseTime < theCurrentTime
+   Browser.msgBox(reponseTime);
+  }
+*/
+
+/*function checkForNewStudent(){
+  ss.setActiveSheet(ss.getSheetByName("New Student Enrollment Responses"));
+  var newstudentcounter = 0;
+  while (1){
+    if(newstudentcounter == 0){
+      continue;
+    }
+    else{
+      var s = ss.getActiveSheet();
+      var dataRange = s.getDataRange();
+      var lastrow = dataRange.getLastRow();
+      //var newfirstname = ss.getRange('B' + )
+      }
+  }
+}
+*/
+function newStudentRowCounter(){
+  ss.setActiveSheet(ss.getSheetByName("New Student Enrollment Responses"));
+  
+  //when form is submitted, finds value in E1 and adds 1 to go to next row
+  var responseRow = ss.getRange('E1').getValue()
+  responseRow = responseRow + 1
+  
+  var studentFirstName = ss.getRange('B' + responseRow).getValue();
+  var studentLastName = ss.getRange('C' + responseRow).getValue();
+  var studentClasses = ss.getRange('D' + responseRow).getValue();
+  
+  //Value in E1 is updated
+  ss.getRange('E1').setValue(responseRow);
+  
+  ss.setActiveSheet(ss.getSheetByName("Roster"));
+  
+  //rosterRow is the row where new student info is going to be on
+  var rosterRow = ss.getRange('H1').getValue()
+  
+  //updates rosterRow since it is a new student
+  rosterRow = rosterRow + 1
+  
+  //New student serial number
+  ss.getRange('A' + rosterRow).setValue(rosterRow - 2);
+  ss.getRange('B' + rosterRow).setValue(studentFirstName);
+  ss.getRange('C' + rosterRow).setValue(studentLastName);
+  
+  ss.getRange('H1').setValue(rosterRow)
+  //sets which classes the new student takes
+  if (studentClasses == "Beginning"){
+    ss.getRange('D' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Beginning, Intermediate"){
+    ss.getRange('D' + rosterRow).setValue(1);
+    ss.getRange('E' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Beginning, Intermediate, Advanced"){
+    ss.getRange('D' + rosterRow).setValue(1);
+    ss.getRange('E' + rosterRow).setValue(1);
+    ss.getRange('F' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Beginning, Intermediate, Advanced, Open"){
+    ss.getRange('D' + rosterRow).setValue(1);
+    ss.getRange('E' + rosterRow).setValue(1);
+    ss.getRange('F' + rosterRow).setValue(1);
+    ss.getRange('G' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Beginning, Open"){
+    ss.getRange('D' + rosterRow).setValue(1);
+    ss.getRange('G' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Intermediate"){
+    ss.getRange('E' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Intermediate, Advanced"){
+    ss.getRange('E' + rosterRow).setValue(1);
+    ss.getRange('F' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Intermediate, Advanced, Open"){
+    ss.getRange('E' + rosterRow).setValue(1);
+    ss.getRange('F' + rosterRow).setValue(1);
+    ss.getRange('G' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Intermediate, Open"){
+    ss.getRange('E' + rosterRow).setValue(1);
+    ss.getRange('G' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Advanced"){
+    ss.getRange('F' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Advanced, Open"){
+    ss.getRange('F' + rosterRow).setValue(1);
+    ss.getRange('G' + rosterRow).setValue(1);
+  }
+  if (studentClasses == "Open"){
+    ss.getRange('G' + rosterRow).setValue(1);
+  }
+  
+}
+
